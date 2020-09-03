@@ -22,14 +22,14 @@ impl fmt::Display for Domain {
                 } else {
                     write!(f, "{}", addr)
                 }
-            },
+            }
             Domain::Domain(domain, port) => {
                 if let Some(port) = port {
                     write!(f, "{}:{}", domain, port)
                 } else {
                     write!(f, "{}", domain)
                 }
-            },
+            }
         }
     }
 }
@@ -71,7 +71,7 @@ pub fn parse_domain_domain<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8
     input: &'a [u8],
 ) -> IResult<&'a [u8], Domain, E> {
     let (input, domain) = map_res::<_, _, _, _, E, _, _>(
-        take_while::<_, _, E>(|item| is_alphanumeric(item) || item == b'.'),
+        take_while::<_, _, E>(|item| is_alphanumeric(item) || item == b'.' || item == b'-'),
         slice_to_string::<E>,
     )(input)?;
     let (input, _) = opt::<_, _, E, _>(char::<_, E>(':'))(input)?;

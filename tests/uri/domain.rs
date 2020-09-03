@@ -18,6 +18,13 @@ fn read_domain() {
         Ok((remains.as_ref(), domain)),
         parse_domain::<VerboseError<&[u8]>>(b"example.com:8080 ")
     );
+
+    let remains = vec![b' '];
+    let domain = domain!("pou-ti-ne.ca", 443);
+    assert_eq!(
+        Ok((remains.as_ref(), domain)),
+        parse_domain::<VerboseError<&[u8]>>(b"pou-ti-ne.ca:443 ")
+    );
 }
 
 #[test]
