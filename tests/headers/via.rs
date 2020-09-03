@@ -13,6 +13,16 @@ fn write() {
         "Via: SIP/2.0/UDP example.com".to_string(),
         format!("{}", header)
     );
+
+    let header = ViaHeader {
+        version: Version::default(),
+        transport: Transport::Tls,
+        uri: Uri::new_schemaless(domain!("example.com")),
+    };
+    assert_eq!(
+        "Via: SIP/2.0/TLS example.com".to_string(),
+        format!("{}", header)
+    );
 }
 
 #[test]
@@ -66,6 +76,21 @@ fn read() {
         uri: Uri::new_schemaless(ip_domain!(192, 168, 1, 120))
             .parameter(UriParam::Branch("03395ed83a7b9502c671c769bbe369cb".into()))
             .parameter(UriParam::Received(ip_domain!(192, 168, 1, 76))),
+    };
+    assert_eq!(
+        Ok((remains.as_ref(), Header::Via(header))),
+        parse_via_header::<VerboseError<&[u8]>>(input)
+    );
+
+    let input = b"Via: SIP/2.0/TLS example.org:5061;rport=5061;branch=z9hG4bK776098908490;transport=TLS\r\n";
+    let remains = vec![];
+    let header = ViaHeader {
+        version: Version::default(),
+        transport: Transport::Tls,
+        uri: Uri::new_schemaless(domain!("example.org", 5061))
+            .parameter(UriParam::RPort(Some(5061)))
+            .parameter(UriParam::Branch("z9hG4bK776098908490".into()))
+            .parameter(UriParam::Transport(Transport::Tls)),
     };
     assert_eq!(
         Ok((remains.as_ref(), Header::Via(header))),

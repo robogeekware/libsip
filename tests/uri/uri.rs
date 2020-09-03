@@ -84,6 +84,15 @@ fn read_uri() {
             b"sip:username:password@hostname.com:8080;transport=TCP;Some=Other "
         )
     );
+
+    let expected_remains = vec![b' '];
+    let expected = Uri::sip(domain!("ex-ample.net", 1209))
+        .parameter(UriParam::Transport(Transport::Tls))
+        .auth(uri_auth!("b0b", "l33t"));
+    assert_eq!(
+        Ok((expected_remains.as_ref(), expected)),
+        parse_uri::<VerboseError<&[u8]>>(b"sip:b0b:l33t@ex-ample.net:1209;transport=TLS ")
+    );
 }
 
 #[test]

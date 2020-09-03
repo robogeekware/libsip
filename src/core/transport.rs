@@ -8,6 +8,7 @@ use std::fmt;
 pub enum Transport {
     Udp,
     Tcp,
+    Tls,
 }
 
 impl Default for Transport {
@@ -21,6 +22,7 @@ impl fmt::Display for Transport {
         match self {
             Transport::Udp => write!(f, "UDP"),
             Transport::Tcp => write!(f, "TCP"),
+            Transport::Tls => write!(f, "TLS"),
         }
     }
 }
@@ -30,6 +32,7 @@ pub fn parse_transport<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], s
     input: &'a [u8],
 ) -> IResult<&'a [u8], Transport, E> {
     alt::<_, _, E, _>((
+        map(tag_no_case::<_, _, E>("TLS"), |_| Transport::Tls),
         map(tag_no_case::<_, _, E>("TCP"), |_| Transport::Tcp),
         map(tag_no_case::<_, _, E>("UDP"), |_| Transport::Udp),
     ))(input)
