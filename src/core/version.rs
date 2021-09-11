@@ -4,6 +4,7 @@ use nom::{
     character::{complete::char as parse_char, is_digit},
     combinator::map_res,
     error::ParseError,
+    error::FromExternalError,
     IResult,
 };
 
@@ -33,7 +34,7 @@ impl Version {
 }
 
 /// Parse the SIP protocol version.
-pub fn parse_version<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_version<'a, E: ParseError<&'a [u8]> + FromExternalError<&'a [u8], std::io::Error>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Version, E> {
     let (input, _) = tag("SIP/")(input)?;

@@ -1,4 +1,4 @@
-use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::ParseError, IResult};
+use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::ParseError,error::FromExternalError, IResult};
 use std::fmt;
 
 /// SIP protocol methods.
@@ -65,7 +65,7 @@ impl fmt::Display for Method {
 }
 
 /// Parse SIP request Method.
-pub fn parse_method<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Method, E> {
+pub fn parse_method<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Method, E> {
     alt::<_, _, E, _>((
         map(tag_no_case("INVITE"), |_| Method::Invite),
         map(tag_no_case("ACK"), |_| Method::Ack),

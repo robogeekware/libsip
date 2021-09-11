@@ -6,6 +6,7 @@ use nom::{
     character::{complete::char, is_alphanumeric},
     combinator::{map_res, opt},
     error::ParseError,
+    error::FromExternalError,
     IResult,
 };
 
@@ -46,7 +47,7 @@ impl fmt::Display for UriAuth {
 }
 
 /// Parse the username/password of a uri.
-pub fn parse_uriauth<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_uriauth<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], UriAuth, E> {
     let (input, username) = map_res(take_while(is_alphanumeric), slice_to_string::<E>)(input)?;
@@ -56,7 +57,7 @@ pub fn parse_uriauth<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// Currently this will only accept alphanumeric characters.
-pub fn parse_password<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_password<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], String, E> {
     let (input, _) = char(':')(input)?;

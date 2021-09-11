@@ -1,6 +1,6 @@
 # libsip
 
-**DEPRECIATED**: Since the release of nom 6, this library fails to compile. It needs to be rewritten entirely for the new nom version.
+
 
 libsip is a library implementation of the sip protocol as described in
 [rfc3261](https://tools.ietf.org/html/rfc3261). libsip intends to implement

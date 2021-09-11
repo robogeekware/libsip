@@ -1,4 +1,6 @@
-use nom::{branch::alt, character::*, IResult};
+use nom::{branch::alt, character::*, IResult,
+          error::FromExternalError
+};
 
 use std::fmt;
 
@@ -147,7 +149,7 @@ pub fn display_headers_and_body(
 }
 
 /// Parse SIP headers recursivily
-pub fn parse_headers<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_headers<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Headers, E> {
     let mut headers = Headers(vec![]);
@@ -182,7 +184,7 @@ use nom::{
 ///     Ok(("".as_bytes(), "Call/Transaction Does Not Exist".as_bytes()))
 /// );
 /// ```
-pub fn parse_reason_phrase<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_reason_phrase<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], &'a [u8], E> {
     let pred = |c| is_reserved(c) || is_unreserved(c) || is_space(c);
@@ -190,7 +192,7 @@ pub fn parse_reason_phrase<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// Parse a SIP message assuming it is a SIP response.
-pub fn parse_response<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_response<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], SipMessage, E> {
     let (input, version) = parse_version::<E>(input)?;
@@ -215,7 +217,7 @@ pub fn parse_response<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// Parse a SIP message assuming it is a SIP request.
-pub fn parse_request<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_request<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], SipMessage, E> {
     let (input, method) = parse_method(input)?;
@@ -241,7 +243,7 @@ pub fn parse_request<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// This is the main parsing function for libsip.
-pub fn parse_message<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_message<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], SipMessage, E> {
     alt::<_, _, E, _>((parse_request::<E>, parse_response::<E>))(input)

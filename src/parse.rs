@@ -4,7 +4,7 @@ use nom::{
     bytes::complete::{take_until, take_while},
     character::{complete::char as parse_char, is_alphanumeric, *},
     combinator::map_res,
-    error::{ErrorKind, ParseError},
+    error::{ErrorKind, ParseError,FromExternalError},
     IResult,
 };
 
@@ -14,7 +14,7 @@ use std::{
 };
 
 /// Parse input as a string using `String::from_utf8`.
-pub fn slice_to_string<'a, E: ParseError<&'a [u8]>>(slice: &'a [u8]) -> Result<String, E> {
+pub fn slice_to_string<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(slice: &'a [u8]) -> Result<String, E> {
     if slice.is_empty() {
         Err(E::from_error_kind(slice, ErrorKind::Eof))
     } else {
@@ -36,7 +36,7 @@ pub fn slice_to_gen_value_nullable(slice: &[u8]) -> Result<GenValue, IoError> {
 }
 
 /// Parse unsigned 16 bit integer using `Parse::parse`.
-pub fn parse_u16<'a, E: ParseError<&'a [u8]>>(slice: &'a [u8]) -> Result<u16, E> {
+pub fn parse_u16<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(slice: &'a [u8]) -> Result<u16, E> {
     Ok(::std::str::from_utf8(slice)
         .map_err(|_| E::from_error_kind(slice, ErrorKind::IsNot))?
         .parse()
@@ -78,13 +78,13 @@ pub fn parse_f32(slice: &[u8]) -> Result<f32, IoError> {
 }
 
 /// Parse Input as a vector of bytes.
-pub fn parse_byte_vec<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_byte_vec<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Vec<u8>, E> {
     Ok((&input[input.len()..], input.to_vec()))
 }
 
-pub fn parse_ip_address<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_ip_address<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&[u8], Ipv4Addr, E> {
     let (input, byte1) = map_res(take_while(is_digit), parse_u8)(input)?;
@@ -97,18 +97,18 @@ pub fn parse_ip_address<'a, E: ParseError<&'a [u8]>>(
     Ok((input, Ipv4Addr::new(byte1, byte2, byte3, byte4)))
 }
 
-pub fn parse_string<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
+pub fn parse_string<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
     map_res(take_while(is_alphanumeric), slice_to_string::<E>)(input)
 }
 
-pub fn parse_possibly_quoted_string<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_possibly_quoted_string<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], String, E> {
     let alts = (parse_string::<E>, parse_quoted_string::<E>);
     alt::<_, _, E, _>(alts)(input)
 }
 
-pub fn parse_quoted_string<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_quoted_string<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], String, E> {
     let (input, _) = parse_char('"')(input)?;
@@ -117,7 +117,7 @@ pub fn parse_quoted_string<'a, E: ParseError<&'a [u8]>>(
     Ok((input, out))
 }
 
-pub fn parse_quoted_string_as_gen_value<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_quoted_string_as_gen_value<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], GenValue, E> {
     let (input, _) = parse_char('"')(input)?;
@@ -127,7 +127,7 @@ pub fn parse_quoted_string_as_gen_value<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// [RFC3261: Page 220, "reserved"](https://tools.ietf.org/html/rfc3261#page-220)
-pub fn parse_reserved<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_reserved<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], &'a [u8], E> {
     let (input, out) = take_while(is_reserved)(input)?;
@@ -135,7 +135,7 @@ pub fn parse_reserved<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// [RFC3261: Page 220, "unreserved"](https://tools.ietf.org/html/rfc3261#page-220)
-pub fn parse_unreserved<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_unreserved<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], &'a [u8], E> {
     let (input, out) = take_while(is_reserved)(input)?;

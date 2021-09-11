@@ -13,6 +13,7 @@ use nom::{
     character::{complete::char, is_space},
     combinator::{map, opt},
     error::ParseError,
+    error::FromExternalError,
     IResult,
 };
 use std::{collections::HashMap, fmt};
@@ -141,7 +142,7 @@ impl fmt::Display for SubscriptionState {
 ///     ))
 /// );
 /// ```
-pub fn parse_subscription_state_header<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_subscription_state_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
@@ -155,7 +156,7 @@ pub fn parse_subscription_state_header<'a, E: ParseError<&'a [u8]>>(
     Ok((input, Header::SubscriptionState(state)))
 }
 
-pub fn parse_subscription_state_without_params<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_subscription_state_without_params<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], SubscriptionState, E> {
     alt::<_, _, E, _>((
@@ -181,7 +182,7 @@ pub fn parse_subscription_state_without_params<'a, E: ParseError<&'a [u8]>>(
     ))(input)
 }
 
-pub fn parse_subscription_state_params<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_subscription_state_params<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
     state: &mut SubscriptionState,
 ) -> IResult<&'a [u8], (), E> {

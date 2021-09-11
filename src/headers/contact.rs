@@ -1,4 +1,4 @@
-use nom::{error::ParseError, IResult};
+use nom::{error::ParseError,error::FromExternalError, IResult};
 
 use crate::{headers::parse::parse_generic_param_with_possibly_quoted_value, Uri};
 
@@ -141,7 +141,7 @@ impl fmt::Display for GenValue {
 }
 
 /// Parse as many valid named field params as the input contains.
-pub fn parse_contact_field_params<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_contact_field_params<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     mut input: &'a [u8],
 ) -> IResult<&'a [u8], HashMap<String, Option<GenValue>>, E> {
     let mut map = HashMap::new();

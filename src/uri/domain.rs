@@ -40,10 +40,11 @@ use nom::{
     character::complete::char,
     combinator::{map_res, opt},
     error::ParseError,
+    error::FromExternalError,
     IResult,
 };
 
-pub fn parse_port<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_port<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Option<u16>, E> {
     let (input, port) = opt(map_res::<_, _, _, _, E, _, _>(
@@ -53,11 +54,11 @@ pub fn parse_port<'a, E: ParseError<&'a [u8]>>(
     Ok((input, port))
 }
 
-pub fn parse_domain<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Domain, E> {
+pub fn parse_domain<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Domain, E> {
     alt((parse_ip_domain::<E>, parse_domain_domain::<E>))(input)
 }
 
-pub fn parse_ip_domain<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_ip_domain<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Domain, E> {
     let (input, addr) = parse_ip_address::<E>(input)?;
@@ -66,7 +67,7 @@ pub fn parse_ip_domain<'a, E: ParseError<&'a [u8]>>(
     Ok((input, Domain::Ipv4(addr, port)))
 }
 
-pub fn parse_domain_domain<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_domain_domain<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Domain, E> {
     let (input, domain) = map_res::<_, _, _, _, E, _, _>(

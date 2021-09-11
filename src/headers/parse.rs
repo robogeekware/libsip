@@ -13,13 +13,14 @@ use nom::{
     character::{complete::char, *},
     combinator::{map, map_res, opt},
     error::ParseError,
+    error::FromExternalError,
     multi::separated_list0,
     sequence::pair,
     IResult,
 };
 use std::collections::HashMap;
 
-pub fn parse_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header> {
+pub fn parse_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header> {
     let (input, _) = opt(take_while(is_space))(input)?;
     let (input, header) = _parse_header(input)?;
     Ok((input, header))
@@ -78,7 +79,7 @@ named!(pub _parse_header<Header>, alt!(
 
 macro_rules! impl_u32_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+        pub fn $name<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
@@ -91,7 +92,7 @@ macro_rules! impl_u32_parser {
 }
 macro_rules! impl_f32_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+        pub fn $name<'a, E: ParseError<&'a [u8]> + FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
@@ -105,7 +106,7 @@ macro_rules! impl_f32_parser {
 
 macro_rules! impl_string_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+        pub fn $name<'a, E: ParseError<&'a [u8]> + FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case::<_, _, E>($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
@@ -119,7 +120,7 @@ macro_rules! impl_string_parser {
 
 macro_rules! impl_array_parser {
     ($name:tt, $tag:tt, $variant:ident, $func:ident) => {
-        pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+        pub fn $name<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
@@ -133,7 +134,7 @@ macro_rules! impl_array_parser {
 
 macro_rules! impl_named_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+        pub fn $name<'a, E: ParseError<&'a [u8]>  + FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
@@ -155,7 +156,7 @@ macro_rules! impl_named_parser {
 
 macro_rules! impl_type_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+        pub fn $name<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
@@ -168,7 +169,7 @@ macro_rules! impl_type_parser {
 
 macro_rules! impl_lang_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+        pub fn $name<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
@@ -259,7 +260,7 @@ impl_lang_parser!(
     AcceptLanguage
 );
 
-fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>>(
+fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], HashMap<String, String>, E> {
     let mut map = HashMap::new();
@@ -271,7 +272,7 @@ fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>>(
     Ok((data, map))
 }
 
-pub fn parse_other_header<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_other_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
@@ -285,7 +286,7 @@ pub fn parse_other_header<'a, E: ParseError<&'a [u8]>>(
     Ok((input, Header::Other(key, value)))
 }
 
-pub fn parse_cseq_header<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_cseq_header<'a, E: ParseError<&'a [u8]> + FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
@@ -300,7 +301,7 @@ pub fn parse_cseq_header<'a, E: ParseError<&'a [u8]>>(
     Ok((input, Header::CSeq(value, method)))
 }
 
-pub fn parse_contact_header<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_contact_header<'a, E: ParseError<&'a [u8]> + FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = tag_no_case("Contact")(input)?;
@@ -320,7 +321,7 @@ pub fn parse_contact_header<'a, E: ParseError<&'a [u8]>>(
     ))
 }
 
-pub fn parse_via_header<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_via_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = tag_no_case("Via")(input)?;
@@ -343,7 +344,7 @@ pub fn parse_via_header<'a, E: ParseError<&'a [u8]>>(
     ))
 }
 
-pub fn parse_www_authenticate_header<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_www_authenticate_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
@@ -362,7 +363,7 @@ pub fn parse_www_authenticate_header<'a, E: ParseError<&'a [u8]>>(
     ))
 }
 
-pub fn parse_authorization_header<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_authorization_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
@@ -378,7 +379,7 @@ pub fn parse_authorization_header<'a, E: ParseError<&'a [u8]>>(
     Ok((input, Header::Authorization(auth::AuthHeader(schema, res))))
 }
 
-pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], (String, String), E> {
     let (input, _) = opt(char(','))(input)?;
@@ -389,7 +390,7 @@ pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>>(
     Ok((input, (key, value)))
 }
 
-pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], auth::AuthSchema, E> {
     Ok(map(tag_no_case("Digest"), |_| auth::AuthSchema::Digest)(
@@ -427,7 +428,7 @@ pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>>(
 ///     Ok(("".as_bytes(), (String::from("+param-without-value"), None)))
 /// );
 /// ```
-pub fn parse_generic_param<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_generic_param<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], (String, Option<String>), E> {
     let (input, _) = char(';')(input)?;
@@ -441,7 +442,7 @@ pub fn parse_generic_param<'a, E: ParseError<&'a [u8]>>(
     }
 }
 
-pub fn parse_generic_param_with_possibly_quoted_value<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_generic_param_with_possibly_quoted_value<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], (String, Option<GenValue>), E> {
     let (input, _) = char(';')(input)?;
@@ -470,7 +471,7 @@ pub fn parse_generic_param_with_possibly_quoted_value<'a, E: ParseError<&'a [u8]
 ///     Ok(("".as_bytes(), String::from("comma,separated,values")))
 /// );
 /// ```
-pub fn parse_gen_value<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_gen_value<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], String, E> {
     // gen-value = token / host / quoted-string
@@ -482,7 +483,7 @@ pub fn parse_gen_value<'a, E: ParseError<&'a [u8]>>(
     Ok((input, value))
 }
 
-pub fn parse_gen_possibly_quoted_value<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_gen_possibly_quoted_value<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], GenValue, E> {
     // gen-value = token / host / quoted-string

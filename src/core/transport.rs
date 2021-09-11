@@ -1,4 +1,4 @@
-use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::ParseError, IResult};
+use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::ParseError,error::FromExternalError, IResult};
 use serde::{Deserialize, Serialize};
 
 use std::fmt;
@@ -26,7 +26,7 @@ impl fmt::Display for Transport {
 }
 
 /// Parse a SIP message transport protocol.
-pub fn parse_transport<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_transport<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Transport, E> {
     alt::<_, _, E, _>((

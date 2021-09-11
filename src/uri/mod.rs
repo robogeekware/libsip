@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use std::{fmt, io::Result as IoResult, str::FromStr};
 
-use nom::{character::complete::char, combinator::opt, error::ParseError, sequence::pair, IResult};
+use nom::{character::complete::char, combinator::opt, error::ParseError, error::FromExternalError, sequence::pair, IResult};
 
 pub mod schema;
 pub use self::schema::{parse_schema, UriSchema};
@@ -125,7 +125,7 @@ impl fmt::Display for Uri {
     }
 }
 
-pub fn parse_uri<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Uri, E> {
+pub fn parse_uri<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], Uri, E> {
     let (input, schema) = opt(pair(parse_schema::<E>, char(':')))(input)?;
     let (input, auth) = opt(parse_uriauth::<E>)(input)?;
     let (input, host) = parse_domain::<E>(input)?;

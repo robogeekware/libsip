@@ -13,6 +13,7 @@ use nom::{
     character::is_alphabetic,
     combinator::map,
     error::ParseError,
+    error::FromExternalError,
     IResult,
 };
 
@@ -30,7 +31,7 @@ pub enum UriParam {
 
 impl UriParam {
     /// Create `UriParam` from a key value pair.
-    pub fn from_key<'a, E: ParseError<&'a [u8]>>(
+    pub fn from_key<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
         key: &'a [u8],
         value: &'a [u8],
     ) -> Result<UriParam, nom::Err<E>> {
@@ -67,7 +68,7 @@ impl fmt::Display for UriParam {
     }
 }
 
-pub fn parse_param<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], UriParam, E> {
+pub fn parse_param<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], UriParam, E> {
     alt::<_, _, E, _>((
         parse_named_param,
         map(tag::<_, _, E>(";rport"), |_| UriParam::RPort(None)),
@@ -76,7 +77,7 @@ pub fn parse_param<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a 
 }
 
 /// Parse a single named field param.
-pub fn parse_named_param<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_named_param<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], UriParam, E> {
     let (input, _) = tag(";")(input)?;
@@ -86,7 +87,7 @@ pub fn parse_named_param<'a, E: ParseError<&'a [u8]>>(
     UriParam::from_key::<E>(key, value).and_then(|item| Ok((input, item)))
 }
 
-pub fn parse_single_param<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_single_param<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], UriParam, E> {
     let (input, _) = tag(";")(input)?;
@@ -98,7 +99,7 @@ pub fn parse_single_param<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// Parse multiple uri parameters.
-pub fn parse_params<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_params<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Vec<UriParam>, E> {
     let mut results = vec![];

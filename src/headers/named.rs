@@ -4,6 +4,7 @@ use nom::{
     character::{complete::char, *},
     combinator::{map_res, opt},
     error::ParseError,
+    error::FromExternalError,
     IResult,
 };
 
@@ -95,7 +96,7 @@ impl fmt::Display for NamedHeader {
 }
 
 /// Parse the name part of the NamedHeader.
-pub fn parse_name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
+pub fn parse_name<'a, E: ParseError<&'a [u8]> + FromExternalError<&'a [u8], std::io::Error> + FromExternalError<&'a [u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
     Ok(alt::<_, _, E, _>((
         parse_quoted_string::<E>,
         parse_unquoted_string::<E>,
@@ -104,7 +105,7 @@ pub fn parse_name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [
 
 /// Parse a stream of text that is not quoted. This will stop
 /// at the first ' ' char the input contains.
-pub fn parse_unquoted_string<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_unquoted_string<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a [u8], std::io::Error> + FromExternalError<&'a [u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], String, E> {
     let (input, string_data) = map_res(take_while(is_alphabetic), slice_to_string::<E>)(input)?;
@@ -113,7 +114,7 @@ pub fn parse_unquoted_string<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// Parse a single NamedHeader value.
-pub fn parse_named_field_value<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_named_field_value<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a [u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], (Option<String>, Uri), E> {
     let (input, name) = opt(parse_name)(input)?;
@@ -125,7 +126,7 @@ pub fn parse_named_field_value<'a, E: ParseError<&'a [u8]>>(
 }
 
 /// Parse as many valid named field params as the input contains.
-pub fn parse_named_field_params<'a, E: ParseError<&'a [u8]>>(
+pub fn parse_named_field_params<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     mut input: &'a [u8],
 ) -> IResult<&'a [u8], HashMap<String, Option<String>>, E> {
     let mut map = HashMap::new();
