@@ -1,12 +1,16 @@
-use libsip::{headers::parse::parse_proxy_authorization_header, Header};
+use libsip::headers::AuthHeader;
+use libsip::{headers::parse::parse_proxy_authorization_header, AuthSchema, Header};
 
 use nom::error::VerboseError;
+use std::collections::HashMap;
 
 #[test]
 fn write() {
-    let header = Header::ProxyAuthorization("call@id.com".into());
+    let mut map = HashMap::new();
+    map.insert("key".into(), "value".into());
+    let header = Header::ProxyAuthorization(AuthHeader(AuthSchema::Digest, map));
     assert_eq!(
-        "Proxy-Authorization: call@id.com".to_string(),
+        "Proxy-Authorization: Digest key=\"value\"".to_string(),
         format!("{}", header)
     );
 }
@@ -14,11 +18,13 @@ fn write() {
 #[test]
 fn read() {
     let remains = vec![];
-    let header = Header::ProxyAuthorization("call@id.com".into());
+    let mut map = HashMap::new();
+    map.insert("key".into(), "value".into());
+    let header = Header::ProxyAuthorization(AuthHeader(AuthSchema::Digest, map));
     assert_eq!(
         Ok((remains.as_ref(), header)),
         parse_proxy_authorization_header::<VerboseError<&[u8]>>(
-            b"Proxy-Authorization: call@id.com\r\n"
+            b"Proxy-Authorization: Digest key=value \r\n"
         )
     );
 }

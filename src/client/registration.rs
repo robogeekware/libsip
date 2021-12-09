@@ -69,6 +69,11 @@ impl RegistrationManager {
         self.pass = Some(p.into());
     }
 
+    /// Set expires
+    pub fn set_expires(&mut self, p: u32) {
+        self.expires_header = Some(p);
+    }
+
     /// Get the register request. if this method is called before `set_challenge`
     /// then no authentication header will be set, if called after `set_challenge`
     /// then the Authorization header will be set.
@@ -79,6 +84,10 @@ impl RegistrationManager {
         let from_header = self.account_uri.clone();
         let mut contact_header = self.local_uri.clone();
         let mut headers = vec![];
+        headers.push(self.via_header());
+        let from = NamedHeader::new(from_header).name("SIPnSee");
+        headers.push(Header::From(from));
+        headers.push(Header::To(NamedHeader::new(to_header)));
 
         if let Some(name) = &self.user {
             contact_header = contact_header.auth(UriAuth::new(name));
@@ -90,21 +99,13 @@ impl RegistrationManager {
                         nc: self.nonce_c,
                         uri: &self.account_uri,
                     };
-                    headers.push(Header::Authorization(auth_header.authenticate(ctx)?));
+                    headers.push(Header::ProxyAuthorization(auth_header.authenticate(ctx)?));
                 }
             }
         }
-        headers.push(Header::ContentLength(0));
-        headers.push(Header::To(NamedHeader::new(to_header)));
-        headers.push(Header::From(NamedHeader::new(from_header)));
         headers.push(Header::Contact(ContactHeader::new(contact_header)));
         headers.push(Header::CSeq(self.cseq_counter, Method::Register));
-        headers.push(Header::CallId(format!(
-            "{}@{}",
-            self.call_id,
-            self.account_uri.host()
-        )));
-        headers.push(self.via_header());
+        headers.push(Header::CallId(self.call_id.to_string()));
         cfg.write_headers_vec(&mut headers);
 
         if let Some(exp) = self.expires_header {
@@ -123,13 +124,13 @@ impl RegistrationManager {
         if let SipMessage::Response { headers, .. } = msg {
             for item in headers.into_iter() {
                 match item {
-                    Header::WwwAuthenticate(auth) => {
+                    Header::WwwAuthenticate(auth) | Header::ProxyAuthenticate(auth) => {
                         self.auth_header = Some(auth);
-                    },
+                    }
                     Header::Expires(expire) => {
                         self.expires_header = Some(expire);
-                    },
-                    _ => {},
+                    }
+                    _ => {}
                 }
             }
             Ok(())

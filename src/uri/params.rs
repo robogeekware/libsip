@@ -45,7 +45,7 @@ impl UriParam {
                 //let mut data = value.to_vec();
                 //data.push(b' ');
                 Ok(UriParam::Received(parse_domain::<E>(&value)?.1))
-            },
+            }
             _method => Ok(UriParam::Other(
                 String::from_utf8_lossy(key).to_string(),
                 Some(String::from_utf8_lossy(value).to_string()),

@@ -92,7 +92,7 @@ impl Uri {
         self
     }
 
-    /// Set the host value.
+    /// Get the host value.
     pub fn host(&self) -> String {
         format!("{}", self.host)
     }

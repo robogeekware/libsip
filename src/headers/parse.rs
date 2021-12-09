@@ -206,16 +206,6 @@ impl_string_parser!(
 );
 impl_string_parser!(parse_date_header, "Date", Date);
 impl_string_parser!(parse_organization_header, "Organization", Organization);
-impl_string_parser!(
-    parse_proxy_authenticate_header,
-    "Proxy-Authenticate",
-    ProxyAuthenticate
-);
-impl_string_parser!(
-    parse_proxy_authorization_header,
-    "Proxy-Authorization",
-    ProxyAuthorization
-);
 impl_string_parser!(parse_proxy_require_header, "Proxy-Require", ProxyRequire);
 impl_string_parser!(parse_require_header, "Require", Require);
 impl_string_parser!(parse_retry_after_header, "Retry-After", RetryAfter);
@@ -344,6 +334,25 @@ pub fn parse_via_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], 
     ))
 }
 
+pub fn parse_proxy_authenticate_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
+    let (input, _) = opt(tag("\r\n"))(input)?;
+    let (input, _) = tag_no_case("Proxy-Authenticate")(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, schema) = parse_auth_schema::<E>(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, res) = parse_auth_header_vars(input)?;
+    let (input, _) = opt(char(' '))(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    Ok((
+        input,
+        Header::ProxyAuthenticate(auth::AuthHeader(schema, res)),
+    ))
+}
+
 pub fn parse_www_authenticate_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
@@ -377,6 +386,25 @@ pub fn parse_authorization_header<'a, E: ParseError<&'a [u8]>+ FromExternalError
     let (input, _) = opt(char(' '))(input)?;
     let (input, _) = tag("\r\n")(input)?;
     Ok((input, Header::Authorization(auth::AuthHeader(schema, res))))
+}
+
+pub fn parse_proxy_authorization_header<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
+    let (input, _) = opt(tag("\r\n"))(input)?;
+    let (input, _) = tag_no_case("Prox-Authorization")(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, schema) = parse_auth_schema(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, res) = parse_auth_header_vars(input)?;
+    let (input, _) = opt(char(' '))(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    Ok((
+        input,
+        Header::ProxyAuthorization(auth::AuthHeader(schema, res)),
+    ))
 }
 
 pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
