@@ -162,6 +162,7 @@ macro_rules! impl_type_parser {
             let (input, _) = char(':')(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, ty) = parse_content_type::<E>(input)?;
+            let (input, _) = tag("\r\n")(input)?;
             Ok((input, Header::$variant(ty)))
         }
     };
