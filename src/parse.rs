@@ -24,8 +24,8 @@ pub fn slice_to_string<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], s
 }
 
 pub fn slice_to_string_nullable(slice: &[u8]) -> Result<String, IoError> {
-    Ok(String::from_utf8(Vec::from(slice))
-        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 string"))?)
+    String::from_utf8(Vec::from(slice))
+        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 string"))
 }
 
 pub fn slice_to_gen_value_nullable(slice: &[u8]) -> Result<GenValue, IoError> {
@@ -37,15 +37,15 @@ pub fn slice_to_gen_value_nullable(slice: &[u8]) -> Result<GenValue, IoError> {
 
 /// Parse unsigned 16 bit integer using `Parse::parse`.
 pub fn parse_u16<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(slice: &'a [u8]) -> Result<u16, E> {
-    Ok(::std::str::from_utf8(slice)
+    ::std::str::from_utf8(slice)
         .map_err(|_| E::from_error_kind(slice, ErrorKind::IsNot))?
         .parse()
-        .map_err(|_| E::from_error_kind(slice, ErrorKind::IsNot))?)
+        .map_err(|_| E::from_error_kind(slice, ErrorKind::IsNot))
 }
 
 /// Parse unsigned 8 bit integer using `Parse::parse`.
 pub fn parse_u8(slice: &[u8]) -> Result<u8, IoError> {
-    Ok(::std::str::from_utf8(slice)
+    ::std::str::from_utf8(slice)
         .map_err(|_| {
             IoError::new(
                 IoErrorKind::InvalidInput,
@@ -53,12 +53,12 @@ pub fn parse_u8(slice: &[u8]) -> Result<u8, IoError> {
             )
         })?
         .parse()
-        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse u8 integer"))?)
+        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse u8 integer"))
 }
 
 /// Parse unsigned 32 bit integer using `Parse::parse`.
 pub fn parse_u32(slice: &[u8]) -> Result<u32, IoError> {
-    Ok(::std::str::from_utf8(slice)
+    ::std::str::from_utf8(slice)
         .map_err(|_| {
             IoError::new(
                 IoErrorKind::InvalidInput,
@@ -66,15 +66,15 @@ pub fn parse_u32(slice: &[u8]) -> Result<u32, IoError> {
             )
         })?
         .parse()
-        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse u32 integer"))?)
+        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse u32 integer"))
 }
 
 /// Parse input as an f32 using `Parse::parse`.
 pub fn parse_f32(slice: &[u8]) -> Result<f32, IoError> {
-    Ok(::std::str::from_utf8(slice)
+    ::std::str::from_utf8(slice)
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 f32"))?
         .parse()
-        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse f32"))?)
+        .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse f32"))
 }
 
 /// Parse Input as a vector of bytes.

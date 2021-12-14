@@ -143,7 +143,7 @@ impl SoftPhone {
 
     /// Simple pass through method to get a registration request.
     pub fn get_register_request(&mut self) -> IoResult<SipMessage> {
-        Ok(self.reg.get_request(&self.header_cfg)?)
+        self.reg.get_request(&self.header_cfg)
     }
 
     /// Set the received auth challenge request.
@@ -154,9 +154,9 @@ impl SoftPhone {
 
     /// Send a new Message to `uri`.
     pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
-        Ok(self
+        self
             .msg
-            .write_message(b, uri, self.reg.via_header(), &self.header_cfg)?)
+            .write_message(b, uri, self.reg.via_header(), &self.header_cfg)
     }
 
     /// Send a new Invite Request to `uri`.

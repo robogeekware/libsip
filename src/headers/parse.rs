@@ -393,7 +393,7 @@ pub fn parse_proxy_authorization_header<'a, E: ParseError<&'a [u8]>+ FromExterna
     input: &'a [u8],
 ) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
-    let (input, _) = tag_no_case("Prox-Authorization")(input)?;
+    let (input, _) = tag_no_case("Proxy-Authorization")(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
     let (input, _) = char(':')(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
@@ -422,9 +422,9 @@ pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u
 pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], auth::AuthSchema, E> {
-    Ok(map(tag_no_case("Digest"), |_| auth::AuthSchema::Digest)(
+    map(tag_no_case("Digest"), |_| auth::AuthSchema::Digest)(
         input,
-    )?)
+    )
 }
 
 /// Parses "generic-param" ([RFC3261: Page 227, "generic-param"](https://tools.ietf.org/html/rfc3261#page-227))

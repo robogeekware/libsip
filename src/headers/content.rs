@@ -51,7 +51,7 @@ use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::Par
 pub fn parse_content_type<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], ContentType, E> {
-    Ok(alt((
+    alt((
         map(tag_no_case("application/sdp"), |_| ContentType::Sdp),
         map(tag_no_case("text/plain"), |_| ContentType::PlainText),
         map(tag_no_case("text/html"), |_| ContentType::Html),
@@ -71,5 +71,5 @@ pub fn parse_content_type<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8]
             ContentType::Javascript
         }),
         map(tag_no_case("application/css"), |_| ContentType::Css),
-    ))(input)?)
+    ))(input)
 }

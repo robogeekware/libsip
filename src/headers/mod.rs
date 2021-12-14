@@ -104,11 +104,21 @@ impl Headers {
         None
     }
 
-    /// Return the CoallId header if one is present.
+    /// Return the CallId header if one is present.
     pub fn call_id(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::CallId(a) = h {
                 return Some(Header::CallId(a.clone()));
+            }
+        }
+        None
+    }
+
+    /// Return the ContentLength header if one is present.
+    pub fn content_length(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::ContentLength(a) = h {
+                return Some(Header::ContentLength(*a));
             }
         }
         None

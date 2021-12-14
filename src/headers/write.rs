@@ -16,7 +16,7 @@ impl fmt::Display for Header {
             Header::Accept(methods) => write_method_array_header("Accept", f, methods),
             Header::Allow(methods) => write_method_array_header("Allow", f, methods),
             Header::ContentEncoding(ty) => write_simple_field("Content-Encoding", ty, f),
-            Header::ContentLength(len) => write_simple_field("Content-Length", len, f),
+            Header::ContentLength(len) => write!(f, "Content-Length: {}", len),
             Header::ContentType(ty) => write_simple_field("Content-Type", ty, f),
             Header::UserAgent(agent) => write_simple_field("User-Agent", agent, f),
             Header::CallId(call_id) => write_simple_field("Call-ID", call_id, f),

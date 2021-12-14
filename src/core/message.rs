@@ -33,20 +33,12 @@ pub enum SipMessage {
 impl SipMessage {
     /// Determine if this is a SIP request.
     pub fn is_request(&self) -> bool {
-        if let SipMessage::Request { .. } = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, SipMessage::Request { .. })
     }
 
     /// Determine if this is a SIP response.
     pub fn is_response(&self) -> bool {
-        if let SipMessage::Response { .. } = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, SipMessage::Response { .. })
     }
 
     pub fn method(&self) -> Result<Method, SipMessageError> {
@@ -144,7 +136,7 @@ pub fn display_headers_and_body(
         writeln!(f, "{}\r", header)?;
     }
     writeln!(f, "\r")?;
-    f.write_str(&String::from_utf8_lossy(&body))?;
+    f.write_str(&String::from_utf8_lossy(body))?;
     Ok(())
 }
 

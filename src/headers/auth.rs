@@ -55,14 +55,14 @@ pub struct AuthContext<'a> {
 
 impl AuthHeader {
     /// Perform the authenticate action.
-    pub fn authenticate<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    pub fn authenticate(&self, ctx: AuthContext) -> IoResult<AuthHeader> {
         match self.0 {
             AuthSchema::Digest => self.handle_digest_auth(ctx),
         }
     }
 
     /// Perform the Digest auth method.
-    fn handle_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    fn handle_digest_auth(&self, ctx: AuthContext) -> IoResult<AuthHeader> {
         if let Some(qop) = self.1.get("qop") {
             match qop.as_ref() {
                 "auth" => return self.handle_digest_qop_auth(ctx),
@@ -73,7 +73,7 @@ impl AuthHeader {
     }
 
     /// Decides witch authorization algorythm to use.
-    fn handle_digest_qop_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    fn handle_digest_qop_auth(&self, ctx: AuthContext) -> IoResult<AuthHeader> {
         let alg = self
             .1
             .get("algorithm")
@@ -88,7 +88,7 @@ impl AuthHeader {
     }
 
     /// Handle the MD5 digest auth method.
-    fn handle_md5_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    fn handle_md5_digest_auth(&self, ctx: AuthContext) -> IoResult<AuthHeader> {
         let realm = self
             .1
             .get("realm")
@@ -119,7 +119,7 @@ impl AuthHeader {
     }
 
     /// Handle sha256 Digest auth method.
-    fn handle_sha256_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    fn handle_sha256_digest_auth(&self, ctx: AuthContext) -> IoResult<AuthHeader> {
         let realm = self
             .1
             .get("realm")
@@ -161,7 +161,7 @@ impl AuthHeader {
     }
 
     /// Handle sha512 auth method.
-    fn handle_sha512_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    fn handle_sha512_digest_auth(&self, ctx: AuthContext) -> IoResult<AuthHeader> {
         let realm = self
             .1
             .get("realm")
@@ -203,7 +203,7 @@ impl AuthHeader {
     }
 
     /// Handle the MD5 digest auth method.
-    fn handle_unspecified_md5_digest<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    fn handle_unspecified_md5_digest(&self, ctx: AuthContext) -> IoResult<AuthHeader> {
         let realm = self
             .1
             .get("realm")
@@ -213,7 +213,7 @@ impl AuthHeader {
             .get("nonce")
             .expect("Auth header does not contain a nonce");
         let mut map: HashMap<String, String> = HashMap::new();
-        let cnonce = self.generate_cnonce();
+        // let cnonce = self.generate_cnonce();
         map.insert("username".into(), ctx.user.to_string());
         map.insert("nonce".into(), nonce.to_string());
         map.insert("realm".into(), realm.clone());

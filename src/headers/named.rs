@@ -97,10 +97,10 @@ impl fmt::Display for NamedHeader {
 
 /// Parse the name part of the NamedHeader.
 pub fn parse_name<'a, E: ParseError<&'a [u8]> + FromExternalError<&'a [u8], std::io::Error> + FromExternalError<&'a [u8], E>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
-    Ok(alt::<_, _, E, _>((
+    alt::<_, _, E, _>((
         parse_quoted_string::<E>,
         parse_unquoted_string::<E>,
-    ))(input)?)
+    ))(input)
 }
 
 /// Parse a stream of text that is not quoted. This will stop

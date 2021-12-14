@@ -36,15 +36,15 @@ impl UriParam {
         value: &'a [u8],
     ) -> Result<UriParam, nom::Err<E>> {
         match key {
-            b"rport" => Ok(UriParam::RPort(parse_port::<E>(&value)?.1)),
-            b"transport" => Ok(UriParam::Transport(parse_transport::<E>(&value)?.1)),
+            b"rport" => Ok(UriParam::RPort(parse_port::<E>(value)?.1)),
+            b"transport" => Ok(UriParam::Transport(parse_transport::<E>(value)?.1)),
             b"branch" => Ok(UriParam::Branch(
                 String::from_utf8(value.to_vec()).expect("Utf-8 Error"),
             )),
             b"received" => {
                 //let mut data = value.to_vec();
                 //data.push(b' ');
-                Ok(UriParam::Received(parse_domain::<E>(&value)?.1))
+                Ok(UriParam::Received(parse_domain::<E>(value)?.1))
             }
             _method => Ok(UriParam::Other(
                 String::from_utf8_lossy(key).to_string(),
@@ -84,7 +84,7 @@ pub fn parse_named_param<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8],
     let (input, key) = take_while(is_alphabetic)(input)?;
     let (input, _) = tag("=")(input)?;
     let (input, value) = take_while(is_token)(input)?;
-    UriParam::from_key::<E>(key, value).and_then(|item| Ok((input, item)))
+    UriParam::from_key::<E>(key, value).map(|item| (input, item))
 }
 
 pub fn parse_single_param<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std::io::Error>  + FromExternalError<&'a[u8], E>>(
@@ -105,7 +105,7 @@ pub fn parse_params<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], std:
     let mut results = vec![];
     let mut data = input;
 
-    while let Ok((remains, param)) = parse_param::<E>(&data) {
+    while let Ok((remains, param)) = parse_param::<E>(data) {
         results.push(param);
         data = remains;
     }

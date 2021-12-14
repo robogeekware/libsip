@@ -83,8 +83,7 @@ impl RegistrationManager {
         let to_header = self.account_uri.clone();
         let from_header = self.account_uri.clone();
         let mut contact_header = self.local_uri.clone();
-        let mut headers = vec![];
-        headers.push(self.via_header());
+        let mut headers = vec![self.via_header()];
         let from = NamedHeader::new(from_header).name("SIPnSee");
         headers.push(Header::From(from));
         headers.push(Header::To(NamedHeader::new(to_header)));
@@ -94,7 +93,7 @@ impl RegistrationManager {
             if let Some(auth_header) = &self.auth_header {
                 if let Some(pass) = &self.pass {
                     let ctx = AuthContext {
-                        user: &name,
+                        user: name,
                         pass,
                         nc: self.nonce_c,
                         uri: &self.account_uri,
@@ -111,11 +110,11 @@ impl RegistrationManager {
         if let Some(exp) = self.expires_header {
             headers.push(Header::Expires(exp));
         }
-        Ok(RequestGenerator::new()
+        RequestGenerator::new()
             .method(Method::Register)
             .uri(self.account_uri.clone().authless())
             .headers(headers)
-            .build()?)
+            .build()
     }
 
     /// After the first register request is sent. pass the received sip response

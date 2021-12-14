@@ -18,10 +18,10 @@ use nom::error::VerboseError;
 use libsip::*;
 use tokio::net::UdpSocket;
 
-const USERNAME: &'static str = "20";
-const PASSWORD: &'static str = "program";
-const SOCKET_ADDRESS: &'static str = "192.168.1.129:5060";
-const SERVER_SOCK_ADDRESS: &'static str = "192.168.1.133:5060";
+const USERNAME: &str = "20";
+const PASSWORD: &str = "program";
+const SOCKET_ADDRESS: &str = "192.168.1.129:5060";
+const SERVER_SOCK_ADDRESS: &str = "192.168.1.133:5060";
 
 async fn registration_process(
     reg: &mut RegistrationManager,
@@ -33,7 +33,7 @@ async fn registration_process(
     if verbose {
         print_sip_message_send(&request);
     }
-    sock.send_to(&format!("{}", request).as_ref(), SERVER_SOCK_ADDRESS)
+    sock.send_to(format!("{}", request).as_ref(), SERVER_SOCK_ADDRESS)
         .await?;
     let (amt, _src) = sock.recv_from(&mut buf).await?;
     let (_, msg) = parse_message::<VerboseError<&[u8]>>(&buf[..amt]).unwrap();
@@ -60,16 +60,16 @@ async fn registration_process(
             if code == 200 {
                 Ok(())
             } else {
-                Err(From::from(IoError::new(
+                Err(IoError::new(
                     IoErrorKind::InvalidInput,
                     "Failed to authenticate",
-                )))
+                ))
             }
         },
-        _ => Err(From::from(IoError::new(
+        _ => Err(IoError::new(
             IoErrorKind::InvalidInput,
             "Failed to authenticate",
-        ))),
+        )),
     }
 }
 

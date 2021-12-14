@@ -20,6 +20,6 @@ fn read() {
     let header = Header::ContentEncoding(ContentType::Sdp);
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_content_encoding_header::<VerboseError<&[u8]>>(b"Content-Encoding: application/sdp")
+        parse_content_encoding_header::<VerboseError<&[u8]>>(b"Content-Encoding: application/sdp\r\n")
     );
 }

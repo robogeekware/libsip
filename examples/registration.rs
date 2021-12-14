@@ -25,7 +25,7 @@ fn get_our_uri() -> Uri {
 fn send_request_get_response(req: SipMessage) -> IoResult<SipMessage> {
     let addr = "0.0.0.0:5060";
     let sock = UdpSocket::bind(addr)?;
-    sock.send_to(&format!("{}", req).as_ref(), "192.168.1.133:5060")?;
+    sock.send_to(format!("{}", req).as_ref(), "192.168.1.133:5060")?;
     let mut buf = vec![0; 65535];
     let (amt, _src) = sock.recv_from(&mut buf)?;
     if let Err(nom::Err::Error((data, _))) = parse_response(&buf[..amt]) {

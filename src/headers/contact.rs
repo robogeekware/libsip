@@ -24,7 +24,7 @@ pub enum GenValue {
 
 impl From<&str> for GenValue {
     fn from(string: &str) -> Self {
-        if string.starts_with("\"") && string.ends_with("\"") {
+        if string.starts_with('\"') && string.ends_with('\"') {
             Self::QuotedString(string[1..=(string.len() - 2)].into())
         } else {
             Self::Token(string.into())
@@ -34,7 +34,7 @@ impl From<&str> for GenValue {
 
 impl From<String> for GenValue {
     fn from(mut string: String) -> Self {
-        if string.starts_with("\"") && string.ends_with("\"") {
+        if string.starts_with('\"') && string.ends_with('\"') {
             Self::QuotedString(string.drain(1..=(string.len() - 2)).collect())
         } else {
             Self::Token(string)
@@ -42,11 +42,11 @@ impl From<String> for GenValue {
     }
 }
 
-impl Into<String> for GenValue {
-    fn into(self) -> String {
-        match self {
-            Self::Token(token) => token,
-            Self::QuotedString(quoted_string) => format!("\"{}\"", quoted_string),
+impl From<GenValue> for String {
+    fn from(val: GenValue) -> Self {
+        match val {
+            GenValue::Token(token) => token,
+            GenValue::QuotedString(quoted_string) => format!("\"{}\"", quoted_string),
         }
     }
 }

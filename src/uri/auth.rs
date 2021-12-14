@@ -61,7 +61,7 @@ pub fn parse_password<'a, E: ParseError<&'a [u8]>+ FromExternalError<&'a[u8], st
     input: &'a [u8],
 ) -> IResult<&'a [u8], String, E> {
     let (input, _) = char(':')(input)?;
-    Ok(map_res(take_while(is_alphanumeric), slice_to_string::<E>)(
+    map_res(take_while(is_alphanumeric), slice_to_string::<E>)(
         input,
-    )?)
+    )
 }
