@@ -213,22 +213,12 @@ impl AuthHeader {
             .get("nonce")
             .expect("Auth header does not contain a nonce");
         let mut map: HashMap<String, String> = HashMap::new();
-        // let cnonce = self.generate_cnonce();
         map.insert("username".into(), ctx.user.to_string());
         map.insert("nonce".into(), nonce.to_string());
         map.insert("realm".into(), realm.clone());
         map.insert("uri".into(), format!("{}", ctx.uri));
-        // map.insert("qop".into(), self.1.get("qop").unwrap().clone());
-        // map.insert("algorithm".into(), "MD5".into());
-        // map.insert("cnonce".into(), format!("{:x}", cnonce));
-        // map.insert("nc".into(), format!("{:08}", ctx.nc));
-        println!("U: {} Realm: {} Pass: {}", ctx.user, realm, ctx.pass);
         let ha1 = md5::compute(&format!("{}:{}:{}", ctx.user, realm, ctx.pass));
-        println!("H2 => REGISTER:{}", ctx.uri);
-
         let ha2 = md5::compute(format!("REGISTER:{}", ctx.uri));
-        println!("Digest {:x}:{}:{:x}", ha1, nonce, ha2);
-
         let digest = format!("{:x}:{}:{:x}", ha1, nonce, ha2);
         let pass = md5::compute(digest);
         map.insert("response".into(), format!("{:x}", pass));
